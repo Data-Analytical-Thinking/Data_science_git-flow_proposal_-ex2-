@@ -1,3 +1,9 @@
-# Data_science_git-flow_proposal_-ex2-
+Proposta de Workflow baseado em Git focado em ciência de Dados.
 
-Maykon
+Autores: Fabrycio Almada, Kauan Divino, Matheus Brandão, Maykon Dutra.
+
+Curso: Inteligência Artificial
+
+Disciplina: Pensamento Analítico de dados
+
+Exemplo_2: Python para a Análise de Dados e Inteligência Artificial na predição da vida útil remanescente de motores da Nasa
