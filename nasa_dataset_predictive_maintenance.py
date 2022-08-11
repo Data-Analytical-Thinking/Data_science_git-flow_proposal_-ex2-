@@ -76,3 +76,76 @@ treino.groupby('motor')['ciclo_tempo'].transform(max)
 treino['RUL'] = treino.groupby('motor')['ciclo_tempo'].transform(max) - treino['ciclo_tempo']
 
 treino[treino['motor'] == 1]['RUL'].tail(20)
+
+#Parte 3: Machine Learning
+
+lista_sensores_remover = [1, 5, 6, 9, 10, 16, 18, 19]
+remover_sensores = ['sensor_' + str(item) for item in lista_sensores_remover]
+
+remover_colunas = indices_lista + configuracao_lista + remover_sensores
+
+X_treino = treino.drop(remover_colunas, axis=1) 
+
+y_treino = X_treino.pop('RUL') 
+
+X_teste = teste.groupby('motor').last().reset_index().drop(remover_colunas, axis=1)
+
+X_teste
+
+# criação de função de avaliação dos modelos
+def avaliacao(y_real, y_pred, legenda):
+    mae = mean_absolute_error(y_real, y_pred)
+    r2 = r2_score(y_real, y_pred)
+    print(f'conjunto {legenda} MAE:{mae}, R2:{r2}')
+
+# ajuste do modelo de árvores aleatórias com os dados de treino
+rf = RandomForestRegressor(random_state=10)
+rf.fit(X_treino, y_treino)
+
+# predição e avaliação com os dados de treino para o modelo gerado
+y_pred_treino = rf.predict(X_treino)
+avaliacao(y_treino, y_pred_treino, 'treino')
+
+# predição e avaliação com os dados de teste para o modelo gerado
+y_pred_teste = rf.predict(X_teste)
+avaliacao(y_teste, y_pred_teste, 'teste')
+
+# comparação gráfica do tempo de vida útil remanescente (RUL) real e predito pelo modelo
+x = np.arange(0,100)
+plt.figure(figsize=(15,4))
+plt.bar(x, y_pred_teste, label='predito')
+plt.bar(x, y_teste['RUL'], label='real', alpha=0.7)
+plt.legend();
+
+y_treino.plot()
+#y_teste.plot()
+
+# Relação entre valores preditos e reais
+sns.scatterplot(x=y_teste['RUL'], y=y_pred_teste)
+plt.xlabel('Real')
+plt.ylabel('Predito')
+
+ind_menor_150 = y_treino < 150
+
+y_treino_150 = y_treino[ind_menor_150]
+X_treino_150 = X_treino[ind_menor_150]
+
+X_treino_150
+
+# predição e avaliação com os dados de treino para o modelo gerado
+y_pred_treino = rf.predict(X_treino_150)
+avaliacao(y_treino_150, y_pred_treino, 'treino')
+
+# predição e avaliação com os dados de teste para o modelo gerado
+y_pred_test_150 = rf.predict(X_teste)
+avaliacao(y_teste, y_pred_test_150, 'teste')
+
+# comparação gráfica do tempo de vida útil remanescente (RUL) real e predito pelo modelo
+plt.figure(figsize=(15,4))
+plt.bar(x, y_pred_test_150, label='predito')
+plt.bar(x, y_teste['RUL'], label='real', alpha=0.7)
+plt.legend();
+
+sns.scatterplot(x=y_teste['RUL'], y=y_pred_test_150)
+plt.xlabel('Real')
+plt.ylabel('Predito')
